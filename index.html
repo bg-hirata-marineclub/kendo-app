@@ -3,36 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KendoTournamentConnect - Test & UI Preview</title>
+    <title>KendoTournamentConnect - App</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-4 md:p-8">
     <div class="max-w-2xl mx-auto space-y-6">
         
         <div class="bg-white p-6 rounded-xl shadow-md">
-            <h1 class="text-2xl font-bold mb-6 text-gray-800">GAS API 疎通テスト</h1>
+            <h1 class="text-2xl font-bold mb-6 text-gray-800">GAS API 連携テスト</h1>
             <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">GAS Web App URL</label>
-                    <input type="text" id="gasUrl" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 bg-gray-50 text-sm" 
-                           placeholder="https://script.google.com/macros/s/.../exec">
-                </div>
-                
                 <div class="grid grid-cols-2 gap-4">
                     <button onclick="testSaveTournament()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition text-sm">
-                        1. 構造保存
+                        1. 構造保存テスト
                     </button>
                     <button onclick="testUpdateMatch()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition text-sm">
-                        2. 試合更新
+                        2. 試合更新テスト
                     </button>
                 </div>
-
                 <div class="mt-4">
                     <button onclick="runLogicTest()" class="w-full bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition text-sm font-bold shadow">
-                        3. 団体戦の勝敗判定をテスト (アラート表示)
+                        3. 団体戦の勝敗判定をテスト
                     </button>
                 </div>
-
                 <div>
                     <pre id="responseLog" class="mt-2 p-4 bg-black text-green-400 rounded-md overflow-x-auto min-h-[60px] text-xs font-mono">待機中...</pre>
                 </div>
@@ -40,8 +32,8 @@
         </div>
 
         <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-indigo-500">
-            <h2 class="text-xl font-bold mb-4 text-gray-800">4. トーナメント表のAI解析（Gemini 3.1）</h2>
-            <p class="text-sm text-gray-500 mb-4">トーナメント表の画像をアップロードして、AIにJSONデータ化させます。</p>
+            <h2 class="text-xl font-bold mb-4 text-gray-800">4. トーナメント表のAI解析（Gemini）</h2>
+            <p class="text-sm text-gray-500 mb-4">画像をアップロードすると、AIが解析して下のUIを自動で書き換えます。</p>
             
             <div class="space-y-4">
                 <input type="file" id="imageInput" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" onchange="previewImage(event)">
@@ -51,23 +43,24 @@
                 </div>
 
                 <button onclick="analyzeImage()" class="w-full bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition text-sm font-bold shadow">
-                    画像をGeminiで解析する
+                    画像をGeminiで解析してUIに反映する
                 </button>
             </div>
         </div>
 
-        <div class="bg-white p-6 rounded-xl shadow-md">
-            <h2 class="text-xl font-bold mb-4 text-gray-800">トーナメントUI プレビュー</h2>
-            <p class="text-sm text-gray-500 mb-4">選手名をタップすると、赤い線がアニメーションで延びます。</p>
+        <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-red-500">
+            <h2 class="text-xl font-bold mb-2 text-gray-800">デジタル・トーナメント表</h2>
+            <p id="tourney_name" class="text-sm font-bold text-red-600 mb-4">（未設定の大会）</p>
+            <p class="text-xs text-gray-500 mb-4">選手名をタップすると、勝敗線がアニメーションで延びます。</p>
             
             <div class="bg-gray-50 p-4 rounded-lg overflow-x-auto border border-gray-200">
                 <svg width="350" height="180" viewBox="0 0 350 180" class="mx-auto">
                     <g transform="translate(20, 30)">
                         <rect id="p1_box" x="0" y="0" width="120" height="35" rx="5" fill="white" stroke="#d1d5db" stroke-width="2" class="cursor-pointer transition-colors" onclick="markWinner('p1')"/>
-                        <text x="10" y="23" font-size="12" font-weight="bold" pointer-events="none">面田 (A高校)</text>
+                        <text id="p1_text" x="10" y="23" font-size="12" font-weight="bold" pointer-events="none">選手1</text>
                         
                         <rect id="p2_box" x="0" y="45" width="120" height="35" rx="5" fill="white" stroke="#d1d5db" stroke-width="2" class="cursor-pointer transition-colors" onclick="markWinner('p2')"/>
-                        <text x="10" y="68" font-size="12" font-weight="bold" pointer-events="none">小手山 (B中学)</text>
+                        <text id="p2_text" x="10" y="68" font-size="12" font-weight="bold" pointer-events="none">選手2</text>
                         
                         <path id="win_line" d="M 120 40 L 160 40 L 160 95 L 200 95" 
                               fill="none" stroke="#e5e7eb" stroke-width="3" stroke-linecap="round"
@@ -76,32 +69,42 @@
 
                     <g transform="translate(220, 75)">
                         <rect x="0" y="0" width="100" height="40" rx="5" fill="#f9fafb" stroke="#e5e7eb" stroke-dasharray="4" />
-                        <text x="50" y="25" font-size="10" fill="#9ca3af" text-anchor="middle">準決勝へ</text>
+                        <text x="50" y="25" font-size="10" fill="#9ca3af" text-anchor="middle">次の試合へ</text>
                     </g>
                 </svg>
             </div>
             
-            <button onclick="location.reload()" class="mt-4 text-xs text-gray-400 hover:underline">リセット（再読み込み）</button>
+            <button onclick="location.reload()" class="mt-4 text-xs text-gray-400 hover:underline">画面をリセット</button>
         </div>
 
     </div>
 
     <script>
+        // ==========================================
+        // ★フロントエンドの設定 (CONFIG) ★
+        // URLを固定にしたので、入力欄が不要になりました！
+        // ==========================================
+        const CONFIG = {
+            GAS_URL: "https://script.google.com/macros/s/AKfycbzjvt0zhTjbKljLut6InqNAR769T_GWrqafZP0D8Y9y2nNH_kH6j81OY6NB8q0-AkaB9w/exec"
+        };
+
         // --- 共通API通信ロジック ---
+        // 戻り値（result）を返すように改良しました
         async function callGas(action, data) {
-            const url = document.getElementById('gasUrl').value;
             const logElement = document.getElementById('responseLog');
-            if (!url) { alert("GASのURLを入力してください！"); return; }
             logElement.innerText = "GASへ送信中... (" + action + ")";
             try {
-                const response = await fetch(url, { method: 'POST', body: JSON.stringify({ action, data }) });
+                const response = await fetch(CONFIG.GAS_URL, { method: 'POST', body: JSON.stringify({ action, data }) });
                 const result = await response.json();
                 logElement.innerText = JSON.stringify(result, null, 2);
+                return result; // 結果を呼び出し元に返す
             } catch (error) {
                 logElement.innerText = "通信エラー:\n" + error;
+                return null;
             }
         }
 
+        // --- テスト用関数 ---
         function testSaveTournament() {
             callGas('SAVE_TOURNAMENT', { tournament_id: "T1", matches: [{ id: "M1", player1: "面田", player2: "小手山", next_match_id: "M3" }] });
         }
@@ -110,8 +113,7 @@
             callGas('UPDATE_MATCH', { id: "M1", score1: 2, score2: 0, winner_id: "面田" });
         }
 
-        // --- ★画像解析用ロジック★ ---
-        // 画像が選択されたらプレビューを表示する
+        // --- 画像プレビュー表示 ---
         function previewImage(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -124,8 +126,8 @@
             reader.readAsDataURL(file);
         }
 
-        // 画像をGAS(Gemini)へ送信する
-        async function analyzeImage() {
+        // --- 画像解析リクエスト送信 ---
+        function analyzeImage() {
             const fileInput = document.getElementById('imageInput');
             const file = fileInput.files[0];
             
@@ -139,14 +141,43 @@
 
             const reader = new FileReader();
             reader.onload = async function(e) {
-                // Base64データのみを抽出（"data:image/jpeg;base64," の部分を除外）
                 const base64String = e.target.result.split(',')[1];
                 const mimeType = file.type;
 
-                // GASへ 'ANALYZE_IMAGE' アクションで送信
-                callGas('ANALYZE_IMAGE', { base64: base64String, mimeType: mimeType });
+                // callGasの完了を待って結果を受け取る
+                const result = await callGas('ANALYZE_IMAGE', { base64: base64String, mimeType: mimeType });
+                
+                // 解析成功なら、UIを更新する関数を呼ぶ！
+                if (result && result.status === 'success' && result.data) {
+                    updateTournamentUI(result.data);
+                }
             };
             reader.readAsDataURL(file);
+        }
+
+        // --- ★新規：取得したJSONデータでUIを書き換える関数★ ---
+        function updateTournamentUI(data) {
+            // 1. 大会名を書き換え
+            if (data.tournament_name) {
+                document.getElementById('tourney_name').innerText = data.tournament_name;
+            }
+
+            // 2. 最初の試合（m1）の選手名を書き換え
+            if (data.matches && data.matches.length > 0) {
+                const match1 = data.matches[0];
+                document.getElementById('p1_text').innerText = match1.player1;
+                document.getElementById('p2_text').innerText = match1.player2;
+            }
+
+            // 3. すでに線が延びていたり色が付いていたらリセットする
+            document.getElementById('win_line').style.strokeDashoffset = "200";
+            ['p1', 'p2'].forEach(pId => {
+                const box = document.getElementById(pId + '_box');
+                box.setAttribute('fill', 'white');
+                box.setAttribute('stroke', '#d1d5db');
+            });
+
+            alert("AI解析完了！デジタル・トーナメント表に反映しました。");
         }
 
         // --- UIアニメーションロジック ---
@@ -178,7 +209,6 @@
             matches.forEach(m => {
                 teamA.points += m.scoreA;
                 teamB.points += m.scoreB;
-
                 if (m.scoreA > m.scoreB) {
                     teamA.wins += 1;
                 } else if (m.scoreB > m.scoreA) {
@@ -189,25 +219,19 @@
             let result = "";
             let needsDaihyo = false;
 
-            if (teamA.wins > teamB.wins) {
-                result = "Team A 勝ち (勝数差)";
-            } else if (teamB.wins > teamA.wins) {
-                result = "Team B 勝ち (勝数差)";
-            } else {
-                if (teamA.points > teamB.points) {
-                    result = "Team A 勝ち (本数差)";
-                } else if (teamB.points > teamA.points) {
-                    result = "Team B 勝ち (本数差)";
-                } else {
+            if (teamA.wins > teamB.wins) result = "Team A 勝ち (勝数差)";
+            else if (teamB.wins > teamA.wins) result = "Team B 勝ち (勝数差)";
+            else {
+                if (teamA.points > teamB.points) result = "Team A 勝ち (本数差)";
+                else if (teamB.points > teamA.points) result = "Team B 勝ち (本数差)";
+                else {
                     result = "引き分け (代表戦が必要)";
                     needsDaihyo = true;
                 }
             }
-
             return { teamA, teamB, result, needsDaihyo };
         }
 
-        // 団体戦テスト用実行関数
         function runLogicTest() {
             const dummyMatches = [
                 { pos: "先鋒", scoreA: 2, scoreB: 0 }, 
@@ -216,9 +240,7 @@
                 { pos: "副将", scoreA: 0, scoreB: 0 }, 
                 { pos: "大将", scoreA: 1, scoreB: 0 }  
             ];
-
             const summary = calculateTeamWinner(dummyMatches);
-            console.log("集計結果:", summary);
             alert(`結果: ${summary.result}\nTeamA: ${summary.teamA.wins}勝(${summary.teamA.points}本)\nTeamB: ${summary.teamB.wins}勝(${summary.teamB.points}本)`);
         }
     </script>
