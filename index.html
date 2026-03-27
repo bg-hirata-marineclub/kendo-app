@@ -48,13 +48,13 @@
             </div>
         </div>
 
-        <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-red-500">
+        <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-red-500 overflow-hidden">
             <h2 class="text-xl font-bold mb-2 text-gray-800">デジタル・トーナメント表</h2>
             <p id="tourney_name" class="text-sm font-bold text-red-600 mb-4">（未設定の大会）</p>
             <p class="text-xs text-gray-500 mb-4">選手名をタップすると、勝者が次の試合へ進みます。</p>
             
             <div class="bg-gray-50 p-4 rounded-lg overflow-x-auto border border-gray-200">
-                <svg width="360" height="240" viewBox="0 0 360 240" class="mx-auto">
+                <svg width="540" height="240" viewBox="0 0 540 240" class="mx-auto block min-w-[540px]">
                     
                     <g transform="translate(20, 20)">
                         <rect id="m1_p1_box" x="0" y="0" width="120" height="35" rx="5" fill="white" stroke="#d1d5db" stroke-width="2" class="cursor-pointer transition-colors" onclick="markWinner('m1', 1)"/>
@@ -81,11 +81,21 @@
                     </g>
 
                     <g transform="translate(220, 75)">
-                        <rect id="m3_p1_box" x="0" y="0" width="120" height="35" rx="5" fill="white" stroke="#d1d5db" stroke-width="2" />
+                        <rect id="m3_p1_box" x="0" y="0" width="120" height="35" rx="5" fill="white" stroke="#d1d5db" stroke-width="2" class="cursor-pointer transition-colors" onclick="markWinner('m3', 1)"/>
                         <text id="m3_p1_text" x="10" y="23" font-size="10" fill="#9ca3af" pointer-events="none">m1の勝者</text>
                         
-                        <rect id="m3_p2_box" x="0" y="45" width="120" height="35" rx="5" fill="white" stroke="#d1d5db" stroke-width="2" />
+                        <rect id="m3_p2_box" x="0" y="45" width="120" height="35" rx="5" fill="white" stroke="#d1d5db" stroke-width="2" class="cursor-pointer transition-colors" onclick="markWinner('m3', 2)"/>
                         <text id="m3_p2_text" x="10" y="68" font-size="10" fill="#9ca3af" pointer-events="none">m2の勝者</text>
+
+                        <path id="m3_win_line" d="M 120 40 L 180 40" 
+                              fill="none" stroke="#e5e7eb" stroke-width="3" stroke-linecap="round"
+                              style="transition: stroke 0.4s, stroke-dashoffset 0.6s ease-in-out; stroke-dasharray: 60; stroke-dashoffset: 60;"/>
+                    </g>
+
+                    <g transform="translate(400, 97)">
+                        <text id="champion_label" x="0" y="-10" font-size="12" font-weight="bold" fill="#ef4444">優勝</text>
+                        <rect id="champion_box" x="0" y="0" width="120" height="35" rx="5" fill="#fef2f2" stroke="#ef4444" stroke-width="2" stroke-dasharray="4" class="transition-all duration-500" />
+                        <text id="champion_text" x="10" y="23" font-size="14" font-weight="bold" fill="#ef4444" pointer-events="none"></text>
                     </g>
                 </svg>
             </div>
@@ -148,19 +158,15 @@
             reader.readAsDataURL(file);
         }
 
-        // --- ★修正版：JSONデータでUIを書き換える関数★ ---
         function updateTournamentUI(data) {
-            // .textContent を使用してSVGのテキストを確実に書き換えます
             if (data.tournament_name) {
                 document.getElementById('tourney_name').textContent = data.tournament_name;
             }
 
             if (data.matches && data.matches.length >= 2) {
-                // m1 (第1試合)
                 document.getElementById('m1_p1_text').textContent = data.matches[0].player1;
                 document.getElementById('m1_p2_text').textContent = data.matches[0].player2;
                 
-                // m2 (第2試合)
                 document.getElementById('m2_p1_text').textContent = data.matches[1].player1;
                 document.getElementById('m2_p2_text').textContent = data.matches[1].player2;
             }
@@ -168,8 +174,15 @@
             alert("AI解析完了！デジタル・トーナメント表に反映しました。");
         }
 
-        // --- ★拡張版：勝者を次の枠へ進めるアニメーション★ ---
         function markWinner(matchId, playerNum) {
+            // 選択された枠のテキストを取得
+            const selectedText = document.getElementById(matchId + '_p' + playerNum + '_text').textContent;
+            
+            // ★安全対策：まだ勝ち上がってきていない（初期文字のままの）枠はタップしても無視する
+            if (selectedText === "m1の勝者" || selectedText === "m2の勝者") {
+                return;
+            }
+
             const line = document.getElementById(matchId + '_win_line');
             const box1 = document.getElementById(matchId + '_p1_box');
             const box2 = document.getElementById(matchId + '_p2_box');
@@ -189,26 +202,35 @@
             line.style.stroke = "#ef4444";
             line.style.strokeDashoffset = "0";
 
-            // 勝者の名前を、次の試合（決勝: m3）の枠に自動入力する！
-            const winnerName = document.getElementById(matchId + '_p' + playerNum + '_text').textContent;
+            // 勝者の名前を、次の試合（または優勝枠）に自動入力する
             if (matchId === 'm1') {
                 const m3p1 = document.getElementById('m3_p1_text');
-                m3p1.textContent = winnerName;
-                m3p1.setAttribute('fill', '#111827'); // 黒文字にして目立たせる
+                m3p1.textContent = selectedText;
+                m3p1.setAttribute('fill', '#111827'); 
                 m3p1.setAttribute('font-size', '12');
                 m3p1.setAttribute('font-weight', 'bold');
             } else if (matchId === 'm2') {
                 const m3p2 = document.getElementById('m3_p2_text');
-                m3p2.textContent = winnerName;
+                m3p2.textContent = selectedText;
                 m3p2.setAttribute('fill', '#111827');
                 m3p2.setAttribute('font-size', '12');
                 m3p2.setAttribute('font-weight', 'bold');
+            } else if (matchId === 'm3') {
+                // ★優勝の処理！
+                const champText = document.getElementById('champion_text');
+                const champBox = document.getElementById('champion_box');
+                champText.textContent = selectedText;
+                champBox.setAttribute('stroke-dasharray', '0'); // 枠の点線を実線に変える演出
+                champBox.setAttribute('fill', '#fee2e2'); 
+                
+                // 優勝時は振動パターンを変える（ドッドドドッ）
+                if (window.navigator.vibrate) window.navigator.vibrate([30, 50, 30, 50, 100]);
             }
 
-            if (window.navigator.vibrate) window.navigator.vibrate(15);
+            // 優勝時以外の通常の振動
+            if (matchId !== 'm3' && window.navigator.vibrate) window.navigator.vibrate(15);
         }
 
-        // 団体戦テスト用関数群（変更なし）
         function testSaveTournament() { callGas('SAVE_TOURNAMENT', { tournament_id: "T1", matches: [{ id: "M1", player1: "面田", player2: "小手山", next_match_id: "M3" }] }); }
         function testUpdateMatch() { callGas('UPDATE_MATCH', { id: "M1", score1: 2, score2: 0, winner_id: "面田" }); }
         function calculateTeamWinner(matches) {
