@@ -51,25 +51,41 @@
         <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-red-500">
             <h2 class="text-xl font-bold mb-2 text-gray-800">デジタル・トーナメント表</h2>
             <p id="tourney_name" class="text-sm font-bold text-red-600 mb-4">（未設定の大会）</p>
-            <p class="text-xs text-gray-500 mb-4">選手名をタップすると、勝敗線がアニメーションで延びます。</p>
+            <p class="text-xs text-gray-500 mb-4">選手名をタップすると、勝者が次の試合へ進みます。</p>
             
             <div class="bg-gray-50 p-4 rounded-lg overflow-x-auto border border-gray-200">
-                <svg width="350" height="180" viewBox="0 0 350 180" class="mx-auto">
-                    <g transform="translate(20, 30)">
-                        <rect id="p1_box" x="0" y="0" width="120" height="35" rx="5" fill="white" stroke="#d1d5db" stroke-width="2" class="cursor-pointer transition-colors" onclick="markWinner('p1')"/>
-                        <text id="p1_text" x="10" y="23" font-size="12" font-weight="bold" pointer-events="none">選手1</text>
+                <svg width="360" height="240" viewBox="0 0 360 240" class="mx-auto">
+                    
+                    <g transform="translate(20, 20)">
+                        <rect id="m1_p1_box" x="0" y="0" width="120" height="35" rx="5" fill="white" stroke="#d1d5db" stroke-width="2" class="cursor-pointer transition-colors" onclick="markWinner('m1', 1)"/>
+                        <text id="m1_p1_text" x="10" y="23" font-size="12" font-weight="bold" pointer-events="none">選手1</text>
                         
-                        <rect id="p2_box" x="0" y="45" width="120" height="35" rx="5" fill="white" stroke="#d1d5db" stroke-width="2" class="cursor-pointer transition-colors" onclick="markWinner('p2')"/>
-                        <text id="p2_text" x="10" y="68" font-size="12" font-weight="bold" pointer-events="none">選手2</text>
+                        <rect id="m1_p2_box" x="0" y="45" width="120" height="35" rx="5" fill="white" stroke="#d1d5db" stroke-width="2" class="cursor-pointer transition-colors" onclick="markWinner('m1', 2)"/>
+                        <text id="m1_p2_text" x="10" y="68" font-size="12" font-weight="bold" pointer-events="none">選手2</text>
                         
-                        <path id="win_line" d="M 120 40 L 160 40 L 160 95 L 200 95" 
+                        <path id="m1_win_line" d="M 120 40 L 160 40 L 160 72.5 L 200 72.5" 
+                              fill="none" stroke="#e5e7eb" stroke-width="3" stroke-linecap="round"
+                              style="transition: stroke 0.4s, stroke-dashoffset 0.8s ease-in-out; stroke-dasharray: 200; stroke-dashoffset: 200;"/>
+                    </g>
+
+                    <g transform="translate(20, 130)">
+                        <rect id="m2_p1_box" x="0" y="0" width="120" height="35" rx="5" fill="white" stroke="#d1d5db" stroke-width="2" class="cursor-pointer transition-colors" onclick="markWinner('m2', 1)"/>
+                        <text id="m2_p1_text" x="10" y="23" font-size="12" font-weight="bold" pointer-events="none">選手3</text>
+                        
+                        <rect id="m2_p2_box" x="0" y="45" width="120" height="35" rx="5" fill="white" stroke="#d1d5db" stroke-width="2" class="cursor-pointer transition-colors" onclick="markWinner('m2', 2)"/>
+                        <text id="m2_p2_text" x="10" y="68" font-size="12" font-weight="bold" pointer-events="none">選手4</text>
+                        
+                        <path id="m2_win_line" d="M 120 40 L 160 40 L 160 7.5 L 200 7.5" 
                               fill="none" stroke="#e5e7eb" stroke-width="3" stroke-linecap="round"
                               style="transition: stroke 0.4s, stroke-dashoffset 0.8s ease-in-out; stroke-dasharray: 200; stroke-dashoffset: 200;"/>
                     </g>
 
                     <g transform="translate(220, 75)">
-                        <rect x="0" y="0" width="100" height="40" rx="5" fill="#f9fafb" stroke="#e5e7eb" stroke-dasharray="4" />
-                        <text x="50" y="25" font-size="10" fill="#9ca3af" text-anchor="middle">次の試合へ</text>
+                        <rect id="m3_p1_box" x="0" y="0" width="120" height="35" rx="5" fill="white" stroke="#d1d5db" stroke-width="2" />
+                        <text id="m3_p1_text" x="10" y="23" font-size="10" fill="#9ca3af" pointer-events="none">m1の勝者</text>
+                        
+                        <rect id="m3_p2_box" x="0" y="45" width="120" height="35" rx="5" fill="white" stroke="#d1d5db" stroke-width="2" />
+                        <text id="m3_p2_text" x="10" y="68" font-size="10" fill="#9ca3af" pointer-events="none">m2の勝者</text>
                     </g>
                 </svg>
             </div>
@@ -80,16 +96,10 @@
     </div>
 
     <script>
-        // ==========================================
-        // ★フロントエンドの設定 (CONFIG) ★
-        // URLを固定にしたので、入力欄が不要になりました！
-        // ==========================================
         const CONFIG = {
             GAS_URL: "https://script.google.com/macros/s/AKfycbzjvt0zhTjbKljLut6InqNAR769T_GWrqafZP0D8Y9y2nNH_kH6j81OY6NB8q0-AkaB9w/exec"
         };
 
-        // --- 共通API通信ロジック ---
-        // 戻り値（result）を返すように改良しました
         async function callGas(action, data) {
             const logElement = document.getElementById('responseLog');
             logElement.innerText = "GASへ送信中... (" + action + ")";
@@ -97,23 +107,13 @@
                 const response = await fetch(CONFIG.GAS_URL, { method: 'POST', body: JSON.stringify({ action, data }) });
                 const result = await response.json();
                 logElement.innerText = JSON.stringify(result, null, 2);
-                return result; // 結果を呼び出し元に返す
+                return result; 
             } catch (error) {
                 logElement.innerText = "通信エラー:\n" + error;
                 return null;
             }
         }
 
-        // --- テスト用関数 ---
-        function testSaveTournament() {
-            callGas('SAVE_TOURNAMENT', { tournament_id: "T1", matches: [{ id: "M1", player1: "面田", player2: "小手山", next_match_id: "M3" }] });
-        }
-
-        function testUpdateMatch() {
-            callGas('UPDATE_MATCH', { id: "M1", score1: 2, score2: 0, winner_id: "面田" });
-        }
-
-        // --- 画像プレビュー表示 ---
         function previewImage(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -126,15 +126,10 @@
             reader.readAsDataURL(file);
         }
 
-        // --- 画像解析リクエスト送信 ---
         function analyzeImage() {
             const fileInput = document.getElementById('imageInput');
             const file = fileInput.files[0];
-            
-            if (!file) {
-                alert('画像ファイルを選択してください。');
-                return;
-            }
+            if (!file) { alert('画像ファイルを選択してください。'); return; }
 
             const logElement = document.getElementById('responseLog');
             logElement.innerText = "画像をエンコード中...";
@@ -144,10 +139,8 @@
                 const base64String = e.target.result.split(',')[1];
                 const mimeType = file.type;
 
-                // callGasの完了を待って結果を受け取る
                 const result = await callGas('ANALYZE_IMAGE', { base64: base64String, mimeType: mimeType });
                 
-                // 解析成功なら、UIを更新する関数を呼ぶ！
                 if (result && result.status === 'success' && result.data) {
                     updateTournamentUI(result.data);
                 }
@@ -155,92 +148,91 @@
             reader.readAsDataURL(file);
         }
 
-        // --- ★新規：取得したJSONデータでUIを書き換える関数★ ---
+        // --- ★修正版：JSONデータでUIを書き換える関数★ ---
         function updateTournamentUI(data) {
-            // 1. 大会名を書き換え
+            // .textContent を使用してSVGのテキストを確実に書き換えます
             if (data.tournament_name) {
-                document.getElementById('tourney_name').innerText = data.tournament_name;
+                document.getElementById('tourney_name').textContent = data.tournament_name;
             }
 
-            // 2. 最初の試合（m1）の選手名を書き換え
-            if (data.matches && data.matches.length > 0) {
-                const match1 = data.matches[0];
-                document.getElementById('p1_text').innerText = match1.player1;
-                document.getElementById('p2_text').innerText = match1.player2;
+            if (data.matches && data.matches.length >= 2) {
+                // m1 (第1試合)
+                document.getElementById('m1_p1_text').textContent = data.matches[0].player1;
+                document.getElementById('m1_p2_text').textContent = data.matches[0].player2;
+                
+                // m2 (第2試合)
+                document.getElementById('m2_p1_text').textContent = data.matches[1].player1;
+                document.getElementById('m2_p2_text').textContent = data.matches[1].player2;
             }
-
-            // 3. すでに線が延びていたり色が付いていたらリセットする
-            document.getElementById('win_line').style.strokeDashoffset = "200";
-            ['p1', 'p2'].forEach(pId => {
-                const box = document.getElementById(pId + '_box');
-                box.setAttribute('fill', 'white');
-                box.setAttribute('stroke', '#d1d5db');
-            });
 
             alert("AI解析完了！デジタル・トーナメント表に反映しました。");
         }
 
-        // --- UIアニメーションロジック ---
-        function markWinner(pId) {
-            const line = document.getElementById('win_line');
-            const box1 = document.getElementById('p1_box');
-            const box2 = document.getElementById('p2_box');
+        // --- ★拡張版：勝者を次の枠へ進めるアニメーション★ ---
+        function markWinner(matchId, playerNum) {
+            const line = document.getElementById(matchId + '_win_line');
+            const box1 = document.getElementById(matchId + '_p1_box');
+            const box2 = document.getElementById(matchId + '_p2_box');
 
+            // 色のリセット
             [box1, box2].forEach(box => {
                 box.setAttribute('fill', 'white');
                 box.setAttribute('stroke', '#d1d5db');
             });
 
-            const selectedBox = document.getElementById(pId + '_box');
+            // 選択した枠を赤くする
+            const selectedBox = document.getElementById(matchId + '_p' + playerNum + '_box');
             selectedBox.setAttribute('fill', '#fef2f2');
             selectedBox.setAttribute('stroke', '#ef4444');
 
+            // 線を伸ばす
             line.style.stroke = "#ef4444";
             line.style.strokeDashoffset = "0";
+
+            // 勝者の名前を、次の試合（決勝: m3）の枠に自動入力する！
+            const winnerName = document.getElementById(matchId + '_p' + playerNum + '_text').textContent;
+            if (matchId === 'm1') {
+                const m3p1 = document.getElementById('m3_p1_text');
+                m3p1.textContent = winnerName;
+                m3p1.setAttribute('fill', '#111827'); // 黒文字にして目立たせる
+                m3p1.setAttribute('font-size', '12');
+                m3p1.setAttribute('font-weight', 'bold');
+            } else if (matchId === 'm2') {
+                const m3p2 = document.getElementById('m3_p2_text');
+                m3p2.textContent = winnerName;
+                m3p2.setAttribute('fill', '#111827');
+                m3p2.setAttribute('font-size', '12');
+                m3p2.setAttribute('font-weight', 'bold');
+            }
 
             if (window.navigator.vibrate) window.navigator.vibrate(15);
         }
 
-        // --- 団体戦の結果を計算するロジック ---
+        // 団体戦テスト用関数群（変更なし）
+        function testSaveTournament() { callGas('SAVE_TOURNAMENT', { tournament_id: "T1", matches: [{ id: "M1", player1: "面田", player2: "小手山", next_match_id: "M3" }] }); }
+        function testUpdateMatch() { callGas('UPDATE_MATCH', { id: "M1", score1: 2, score2: 0, winner_id: "面田" }); }
         function calculateTeamWinner(matches) {
-            let teamA = { wins: 0, points: 0 };
-            let teamB = { wins: 0, points: 0 };
-
+            let teamA = { wins: 0, points: 0 }, teamB = { wins: 0, points: 0 };
             matches.forEach(m => {
-                teamA.points += m.scoreA;
-                teamB.points += m.scoreB;
-                if (m.scoreA > m.scoreB) {
-                    teamA.wins += 1;
-                } else if (m.scoreB > m.scoreA) {
-                    teamB.wins += 1;
-                }
+                teamA.points += m.scoreA; teamB.points += m.scoreB;
+                if (m.scoreA > m.scoreB) teamA.wins += 1;
+                else if (m.scoreB > m.scoreA) teamB.wins += 1;
             });
-
-            let result = "";
-            let needsDaihyo = false;
-
-            if (teamA.wins > teamB.wins) result = "Team A 勝ち (勝数差)";
-            else if (teamB.wins > teamA.wins) result = "Team B 勝ち (勝数差)";
+            let result = "", needsDaihyo = false;
+            if (teamA.wins > teamB.wins) result = "Team A 勝ち";
+            else if (teamB.wins > teamA.wins) result = "Team B 勝ち";
             else {
-                if (teamA.points > teamB.points) result = "Team A 勝ち (本数差)";
-                else if (teamB.points > teamA.points) result = "Team B 勝ち (本数差)";
-                else {
-                    result = "引き分け (代表戦が必要)";
-                    needsDaihyo = true;
-                }
+                if (teamA.points > teamB.points) result = "Team A 本数勝ち";
+                else if (teamB.points > teamA.points) result = "Team B 本数勝ち";
+                else { result = "引き分け (代表戦)"; needsDaihyo = true; }
             }
             return { teamA, teamB, result, needsDaihyo };
         }
-
         function runLogicTest() {
-            const dummyMatches = [
-                { pos: "先鋒", scoreA: 2, scoreB: 0 }, 
-                { pos: "次鋒", scoreA: 0, scoreB: 1 }, 
-                { pos: "中堅", scoreA: 1, scoreB: 1 }, 
-                { pos: "副将", scoreA: 0, scoreB: 0 }, 
-                { pos: "大将", scoreA: 1, scoreB: 0 }  
-            ];
-            const summary = calculateTeamWinner(dummyMatches);
+            const summary = calculateTeamWinner([
+                { pos: "先鋒", scoreA: 2, scoreB: 0 }, { pos: "次鋒", scoreA: 0, scoreB: 1 },
+                { pos: "中堅", scoreA: 1, scoreB: 1 }, { pos: "副将", scoreA: 0, scoreB: 0 }, { pos: "大将", scoreA: 1, scoreB: 0 }
+            ]);
             alert(`結果: ${summary.result}\nTeamA: ${summary.teamA.wins}勝(${summary.teamA.points}本)\nTeamB: ${summary.teamB.wins}勝(${summary.teamB.points}本)`);
         }
     </script>
