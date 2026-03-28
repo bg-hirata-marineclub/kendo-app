@@ -6,42 +6,29 @@
     <title>KendoTournamentConnect - App</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 p-4 md:p-8">
+<body class="bg-gray-100 p-4 md:p-8 relative">
     <div class="max-w-2xl mx-auto space-y-6">
         
-        <div class="bg-white p-6 rounded-xl shadow-md">
-            <h1 class="text-2xl font-bold mb-6 text-gray-800">GAS API 連携テスト</h1>
-            <div class="space-y-4">
+        <details class="bg-white p-6 rounded-xl shadow-md cursor-pointer">
+            <summary class="text-lg font-bold text-gray-800 outline-none">GAS API 連携テスト (開発用)</summary>
+            <div class="space-y-4 mt-4 cursor-auto">
                 <div class="grid grid-cols-2 gap-4">
-                    <button onclick="testSaveTournament()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition text-sm">
-                        1. 構造保存テスト
-                    </button>
-                    <button onclick="testUpdateMatch()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition text-sm">
-                        2. 試合更新テスト
-                    </button>
+                    <button onclick="testSaveTournament()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition text-sm">1. 構造保存</button>
+                    <button onclick="testUpdateMatch()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition text-sm">2. 試合更新</button>
                 </div>
-                <div class="mt-4">
-                    <button onclick="runLogicTest()" class="w-full bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition text-sm font-bold shadow">
-                        3. 団体戦の勝敗判定をテスト
-                    </button>
-                </div>
-                <div>
-                    <pre id="responseLog" class="mt-2 p-4 bg-black text-green-400 rounded-md overflow-x-auto min-h-[60px] text-xs font-mono">待機中...</pre>
-                </div>
+                <div class="mt-2"><button onclick="runLogicTest()" class="w-full bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition text-sm font-bold shadow">3. 団体戦ロジックテスト</button></div>
+                <div><pre id="responseLog" class="mt-2 p-4 bg-black text-green-400 rounded-md overflow-x-auto min-h-[60px] text-xs font-mono">待機中...</pre></div>
             </div>
-        </div>
+        </details>
 
         <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-indigo-500">
             <h2 class="text-xl font-bold mb-4 text-gray-800">4. トーナメント表のAI解析（Gemini）</h2>
             <p class="text-sm text-gray-500 mb-4">画像をアップロードすると、AIが解析して下のUIを自動で書き換えます。</p>
-            
             <div class="space-y-4">
                 <input type="file" id="imageInput" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" onchange="previewImage(event)">
-                
                 <div id="imagePreviewContainer" class="hidden mt-4">
                     <img id="imagePreview" class="max-w-full h-auto rounded border border-gray-200" alt="プレビュー">
                 </div>
-
                 <button onclick="analyzeImage()" class="w-full bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition text-sm font-bold shadow">
                     画像をGeminiで解析してUIに反映する
                 </button>
@@ -51,45 +38,39 @@
         <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-red-500 overflow-hidden">
             <h2 class="text-xl font-bold mb-2 text-gray-800">デジタル・トーナメント表</h2>
             <p id="tourney_name" class="text-sm font-bold text-red-600 mb-4">（未設定の大会）</p>
-            <p class="text-xs text-gray-500 mb-4">選手名をタップすると、勝者が次の試合へ進みます。</p>
+            <p class="text-xs text-gray-500 mb-4">試合の枠をタップすると、スコア入力画面が開きます。</p>
             
             <div class="bg-gray-50 p-4 rounded-lg overflow-x-auto border border-gray-200">
                 <svg width="540" height="240" viewBox="0 0 540 240" class="mx-auto block min-w-[540px]">
                     
                     <g transform="translate(20, 20)">
-                        <rect id="m1_p1_box" x="0" y="0" width="120" height="35" rx="5" fill="white" stroke="#d1d5db" stroke-width="2" class="cursor-pointer transition-colors" onclick="markWinner('m1', 1)"/>
-                        <text id="m1_p1_text" x="10" y="23" font-size="12" font-weight="bold" pointer-events="none">選手1</text>
+                        <rect id="m1_p1_box" x="0" y="0" width="120" height="35" rx="5" fill="white" stroke="#d1d5db" stroke-width="2" class="cursor-pointer transition-colors" onclick="openScoreModal('m1')"/>
+                        <text id="m1_p1_text" x="10" y="23" font-size="12" font-weight="bold" pointer-events="none">チームA</text>
                         
-                        <rect id="m1_p2_box" x="0" y="45" width="120" height="35" rx="5" fill="white" stroke="#d1d5db" stroke-width="2" class="cursor-pointer transition-colors" onclick="markWinner('m1', 2)"/>
-                        <text id="m1_p2_text" x="10" y="68" font-size="12" font-weight="bold" pointer-events="none">選手2</text>
+                        <rect id="m1_p2_box" x="0" y="45" width="120" height="35" rx="5" fill="white" stroke="#d1d5db" stroke-width="2" class="cursor-pointer transition-colors" onclick="openScoreModal('m1')"/>
+                        <text id="m1_p2_text" x="10" y="68" font-size="12" font-weight="bold" pointer-events="none">チームB</text>
                         
-                        <path id="m1_win_line" d="M 120 40 L 160 40 L 160 72.5 L 200 72.5" 
-                              fill="none" stroke="#e5e7eb" stroke-width="3" stroke-linecap="round"
-                              style="transition: stroke 0.4s, stroke-dashoffset 0.8s ease-in-out; stroke-dasharray: 200; stroke-dashoffset: 200;"/>
+                        <path id="m1_win_line" d="M 120 40 L 160 40 L 160 72.5 L 200 72.5" fill="none" stroke="#e5e7eb" stroke-width="3" stroke-linecap="round" style="transition: stroke 0.4s, stroke-dashoffset 0.8s ease-in-out; stroke-dasharray: 200; stroke-dashoffset: 200;"/>
                     </g>
 
                     <g transform="translate(20, 130)">
-                        <rect id="m2_p1_box" x="0" y="0" width="120" height="35" rx="5" fill="white" stroke="#d1d5db" stroke-width="2" class="cursor-pointer transition-colors" onclick="markWinner('m2', 1)"/>
-                        <text id="m2_p1_text" x="10" y="23" font-size="12" font-weight="bold" pointer-events="none">選手3</text>
+                        <rect id="m2_p1_box" x="0" y="0" width="120" height="35" rx="5" fill="white" stroke="#d1d5db" stroke-width="2" class="cursor-pointer transition-colors" onclick="openScoreModal('m2')"/>
+                        <text id="m2_p1_text" x="10" y="23" font-size="12" font-weight="bold" pointer-events="none">チームC</text>
                         
-                        <rect id="m2_p2_box" x="0" y="45" width="120" height="35" rx="5" fill="white" stroke="#d1d5db" stroke-width="2" class="cursor-pointer transition-colors" onclick="markWinner('m2', 2)"/>
-                        <text id="m2_p2_text" x="10" y="68" font-size="12" font-weight="bold" pointer-events="none">選手4</text>
+                        <rect id="m2_p2_box" x="0" y="45" width="120" height="35" rx="5" fill="white" stroke="#d1d5db" stroke-width="2" class="cursor-pointer transition-colors" onclick="openScoreModal('m2')"/>
+                        <text id="m2_p2_text" x="10" y="68" font-size="12" font-weight="bold" pointer-events="none">チームD</text>
                         
-                        <path id="m2_win_line" d="M 120 40 L 160 40 L 160 7.5 L 200 7.5" 
-                              fill="none" stroke="#e5e7eb" stroke-width="3" stroke-linecap="round"
-                              style="transition: stroke 0.4s, stroke-dashoffset 0.8s ease-in-out; stroke-dasharray: 200; stroke-dashoffset: 200;"/>
+                        <path id="m2_win_line" d="M 120 40 L 160 40 L 160 7.5 L 200 7.5" fill="none" stroke="#e5e7eb" stroke-width="3" stroke-linecap="round" style="transition: stroke 0.4s, stroke-dashoffset 0.8s ease-in-out; stroke-dasharray: 200; stroke-dashoffset: 200;"/>
                     </g>
 
                     <g transform="translate(220, 75)">
-                        <rect id="m3_p1_box" x="0" y="0" width="120" height="35" rx="5" fill="white" stroke="#d1d5db" stroke-width="2" class="cursor-pointer transition-colors" onclick="markWinner('m3', 1)"/>
+                        <rect id="m3_p1_box" x="0" y="0" width="120" height="35" rx="5" fill="white" stroke="#d1d5db" stroke-width="2" class="cursor-pointer transition-colors" onclick="openScoreModal('m3')"/>
                         <text id="m3_p1_text" x="10" y="23" font-size="10" fill="#9ca3af" pointer-events="none">m1の勝者</text>
                         
-                        <rect id="m3_p2_box" x="0" y="45" width="120" height="35" rx="5" fill="white" stroke="#d1d5db" stroke-width="2" class="cursor-pointer transition-colors" onclick="markWinner('m3', 2)"/>
+                        <rect id="m3_p2_box" x="0" y="45" width="120" height="35" rx="5" fill="white" stroke="#d1d5db" stroke-width="2" class="cursor-pointer transition-colors" onclick="openScoreModal('m3')"/>
                         <text id="m3_p2_text" x="10" y="68" font-size="10" fill="#9ca3af" pointer-events="none">m2の勝者</text>
 
-                        <path id="m3_win_line" d="M 120 40 L 180 40" 
-                              fill="none" stroke="#e5e7eb" stroke-width="3" stroke-linecap="round"
-                              style="transition: stroke 0.4s, stroke-dashoffset 0.6s ease-in-out; stroke-dasharray: 60; stroke-dashoffset: 60;"/>
+                        <path id="m3_win_line" d="M 120 40 L 180 40" fill="none" stroke="#e5e7eb" stroke-width="3" stroke-linecap="round" style="transition: stroke 0.4s, stroke-dashoffset 0.6s ease-in-out; stroke-dasharray: 60; stroke-dashoffset: 60;"/>
                     </g>
 
                     <g transform="translate(400, 97)">
@@ -102,13 +83,42 @@
             
             <button onclick="location.reload()" class="mt-4 text-xs text-gray-400 hover:underline">画面をリセット</button>
         </div>
+    </div>
 
+    <div id="scoreModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden">
+            <div class="bg-red-600 text-white p-4 flex justify-between items-center">
+                <h3 class="font-bold text-lg" id="modalTitle">試合スコア入力</h3>
+                <button onclick="closeScoreModal()" class="text-white hover:text-gray-200 text-2xl font-bold">&times;</button>
+            </div>
+            
+            <div class="p-4 sm:p-6 space-y-4">
+                <div class="flex justify-between items-center font-bold text-gray-700 border-b pb-2">
+                    <div id="modalTeam1" class="w-1/3 text-center truncate">チームA</div>
+                    <div class="w-1/3 text-center text-sm text-gray-500">vs</div>
+                    <div id="modalTeam2" class="w-1/3 text-center truncate">チームB</div>
+                </div>
+
+                <div id="scoreInputs" class="space-y-3">
+                    </div>
+
+                <div class="bg-red-50 p-3 rounded text-sm text-red-800 text-center font-semibold" id="modalAlert">
+                    取得した本数（0〜2）を入力してください。
+                </div>
+            </div>
+
+            <div class="bg-gray-50 p-4 border-t flex justify-end space-x-3">
+                <button onclick="closeScoreModal()" class="px-4 py-2 bg-white border border-gray-300 rounded text-gray-700 hover:bg-gray-100 transition">キャンセル</button>
+                <button onclick="submitScore()" class="px-4 py-2 bg-red-600 text-white rounded font-bold shadow hover:bg-red-700 transition">勝敗を判定して記録</button>
+            </div>
+        </div>
     </div>
 
     <script>
         const CONFIG = {
             GAS_URL: "https://script.google.com/macros/s/AKfycbzjvt0zhTjbKljLut6InqNAR769T_GWrqafZP0D8Y9y2nNH_kH6j81OY6NB8q0-AkaB9w/exec"
         };
+        let currentEditingMatchId = null; // 現在編集中の試合IDを保持
 
         async function callGas(action, data) {
             const logElement = document.getElementById('responseLog');
@@ -129,8 +139,7 @@
             if (!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
-                const img = document.getElementById('imagePreview');
-                img.src = e.target.result;
+                document.getElementById('imagePreview').src = e.target.result;
                 document.getElementById('imagePreviewContainer').classList.remove('hidden');
             };
             reader.readAsDataURL(file);
@@ -138,101 +147,110 @@
 
         function analyzeImage() {
             const fileInput = document.getElementById('imageInput');
-            const file = fileInput.files[0];
-            if (!file) { alert('画像ファイルを選択してください。'); return; }
-
-            const logElement = document.getElementById('responseLog');
-            logElement.innerText = "画像をエンコード中...";
-
+            if (!fileInput.files[0]) { alert('画像ファイルを選択してください。'); return; }
+            document.getElementById('responseLog').innerText = "画像をエンコード中...";
             const reader = new FileReader();
             reader.onload = async function(e) {
                 const base64String = e.target.result.split(',')[1];
-                const mimeType = file.type;
-
-                const result = await callGas('ANALYZE_IMAGE', { base64: base64String, mimeType: mimeType });
-                
-                if (result && result.status === 'success' && result.data) {
-                    updateTournamentUI(result.data);
-                }
+                const result = await callGas('ANALYZE_IMAGE', { base64: base64String, mimeType: fileInput.files[0].type });
+                if (result && result.status === 'success' && result.data) updateTournamentUI(result.data);
             };
-            reader.readAsDataURL(file);
+            reader.readAsDataURL(fileInput.files[0]);
         }
 
         function updateTournamentUI(data) {
-            if (data.tournament_name) {
-                document.getElementById('tourney_name').textContent = data.tournament_name;
-            }
-
+            if (data.tournament_name) document.getElementById('tourney_name').textContent = data.tournament_name;
             if (data.matches && data.matches.length >= 2) {
                 document.getElementById('m1_p1_text').textContent = data.matches[0].player1;
                 document.getElementById('m1_p2_text').textContent = data.matches[0].player2;
-                
                 document.getElementById('m2_p1_text').textContent = data.matches[1].player1;
                 document.getElementById('m2_p2_text').textContent = data.matches[1].player2;
             }
-
             alert("AI解析完了！デジタル・トーナメント表に反映しました。");
         }
 
-        function markWinner(matchId, playerNum) {
-            // 選択された枠のテキストを取得
-            const selectedText = document.getElementById(matchId + '_p' + playerNum + '_text').textContent;
-            
-            // ★安全対策：まだ勝ち上がってきていない（初期文字のままの）枠はタップしても無視する
-            if (selectedText === "m1の勝者" || selectedText === "m2の勝者") {
+        // ==========================================
+        // ★スコア入力モーダルのロジック★
+        // ==========================================
+        const positions = ["先鋒", "次鋒", "中堅", "副将", "大将"];
+
+        function openScoreModal(matchId) {
+            const team1Text = document.getElementById(matchId + '_p1_text').textContent;
+            const team2Text = document.getElementById(matchId + '_p2_text').textContent;
+
+            // まだ勝ち上がってきていない場合は入力できないようにガード
+            if (team1Text.includes("の勝者") || team2Text.includes("の勝者")) {
+                alert("対戦チームがまだ決まっていません。前の試合を先に完了させてください。");
                 return;
             }
 
-            const line = document.getElementById(matchId + '_win_line');
-            const box1 = document.getElementById(matchId + '_p1_box');
-            const box2 = document.getElementById(matchId + '_p2_box');
+            currentEditingMatchId = matchId;
+            document.getElementById('modalTeam1').textContent = team1Text;
+            document.getElementById('modalTeam2').textContent = team2Text;
+            document.getElementById('modalAlert').textContent = "取得した本数（0〜2）を入力してください。";
+            document.getElementById('modalAlert').className = "bg-red-50 p-3 rounded text-sm text-red-800 text-center font-semibold";
 
-            // 色のリセット
-            [box1, box2].forEach(box => {
-                box.setAttribute('fill', 'white');
-                box.setAttribute('stroke', '#d1d5db');
+            // 5人分の入力枠を生成
+            const container = document.getElementById('scoreInputs');
+            container.innerHTML = ''; // クリア
+            
+            positions.forEach((pos, index) => {
+                container.innerHTML += `
+                    <div class="flex items-center justify-between bg-white p-2 border rounded shadow-sm">
+                        <input type="number" id="score_${index}_1" min="0" max="2" value="0" class="w-16 p-1 border rounded text-center font-bold text-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-red-500 outline-none">
+                        <div class="font-bold text-gray-700 w-16 text-center text-sm">${pos}</div>
+                        <input type="number" id="score_${index}_2" min="0" max="2" value="0" class="w-16 p-1 border rounded text-center font-bold text-lg bg-gray-50 focus:bg-white focus:ring-2 focus:ring-red-500 outline-none">
+                    </div>
+                `;
             });
 
-            // 選択した枠を赤くする
-            const selectedBox = document.getElementById(matchId + '_p' + playerNum + '_box');
-            selectedBox.setAttribute('fill', '#fef2f2');
-            selectedBox.setAttribute('stroke', '#ef4444');
-
-            // 線を伸ばす
-            line.style.stroke = "#ef4444";
-            line.style.strokeDashoffset = "0";
-
-            // 勝者の名前を、次の試合（または優勝枠）に自動入力する
-            if (matchId === 'm1') {
-                const m3p1 = document.getElementById('m3_p1_text');
-                m3p1.textContent = selectedText;
-                m3p1.setAttribute('fill', '#111827'); 
-                m3p1.setAttribute('font-size', '12');
-                m3p1.setAttribute('font-weight', 'bold');
-            } else if (matchId === 'm2') {
-                const m3p2 = document.getElementById('m3_p2_text');
-                m3p2.textContent = selectedText;
-                m3p2.setAttribute('fill', '#111827');
-                m3p2.setAttribute('font-size', '12');
-                m3p2.setAttribute('font-weight', 'bold');
-            } else if (matchId === 'm3') {
-                // ★優勝の処理！
-                const champText = document.getElementById('champion_text');
-                const champBox = document.getElementById('champion_box');
-                champText.textContent = selectedText;
-                champBox.setAttribute('stroke-dasharray', '0'); // 枠の点線を実線に変える演出
-                champBox.setAttribute('fill', '#fee2e2'); 
-                
-                // 優勝時は振動パターンを変える（ドッドドドッ）
-                if (window.navigator.vibrate) window.navigator.vibrate([30, 50, 30, 50, 100]);
-            }
-
-            // 優勝時以外の通常の振動
-            if (matchId !== 'm3' && window.navigator.vibrate) window.navigator.vibrate(15);
+            document.getElementById('scoreModal').classList.remove('hidden');
         }
 
-        function testSaveTournament() { callGas('SAVE_TOURNAMENT', { tournament_id: "T1", matches: [{ id: "M1", player1: "面田", player2: "小手山", next_match_id: "M3" }] }); }
-        function testUpdateMatch() { callGas('UPDATE_MATCH', { id: "M1", score1: 2, score2: 0, winner_id: "面田" }); }
+        function closeScoreModal() {
+            document.getElementById('scoreModal').classList.add('hidden');
+            currentEditingMatchId = null;
+        }
+
+        function submitScore() {
+            // 入力されたスコアを収集
+            const matches = [];
+            for (let i = 0; i < 5; i++) {
+                matches.push({
+                    pos: positions[i],
+                    scoreA: parseInt(document.getElementById(`score_${i}_1`).value) || 0,
+                    scoreB: parseInt(document.getElementById(`score_${i}_2`).value) || 0
+                });
+            }
+
+            // 勝敗を判定
+            const summary = calculateTeamWinner(matches);
+            
+            if (summary.needsDaihyo) {
+                // 引き分けの場合
+                const alertBox = document.getElementById('modalAlert');
+                alertBox.textContent = "引き分けです！代表戦の結果を含めて、どちらかの本数を +1 してください。";
+                alertBox.className = "bg-yellow-100 p-3 rounded text-sm text-yellow-800 text-center font-bold border border-yellow-300";
+                if (window.navigator.vibrate) window.navigator.vibrate([100, 100]); // ブブッ
+                return; // モーダルを閉じずに修正を促す
+            }
+
+            // 勝利チームを判定（1 or 2）
+            let winnerNum = 0;
+            if (summary.teamA.wins > summary.teamB.wins || (summary.teamA.wins === summary.teamB.wins && summary.teamA.points > summary.teamB.points)) {
+                winnerNum = 1;
+            } else {
+                winnerNum = 2;
+            }
+
+            // 結果をアラートで表示（任意）
+            alert(`【試合結果】\n${summary.result}\n(チームA: ${summary.teamA.wins}勝 ${summary.teamA.points}本 / チームB: ${summary.teamB.wins}勝 ${summary.teamB.points}本)`);
+
+            // モーダルを閉じて、勝者の線を伸ばす！
+            closeScoreModal();
+            markWinner(currentEditingMatchId, winnerNum);
+        }
+
         function calculateTeamWinner(matches) {
             let teamA = { wins: 0, points: 0 }, teamB = { wins: 0, points: 0 };
             matches.forEach(m => {
@@ -241,22 +259,56 @@
                 else if (m.scoreB > m.scoreA) teamB.wins += 1;
             });
             let result = "", needsDaihyo = false;
-            if (teamA.wins > teamB.wins) result = "Team A 勝ち";
-            else if (teamB.wins > teamA.wins) result = "Team B 勝ち";
+            if (teamA.wins > teamB.wins) result = "チームA 勝ち";
+            else if (teamB.wins > teamA.wins) result = "チームB 勝ち";
             else {
-                if (teamA.points > teamB.points) result = "Team A 本数勝ち";
-                else if (teamB.points > teamA.points) result = "Team B 本数勝ち";
-                else { result = "引き分け (代表戦)"; needsDaihyo = true; }
+                if (teamA.points > teamB.points) result = "チームA 本数勝ち";
+                else if (teamB.points > teamA.points) result = "チームB 本数勝ち";
+                else { result = "引き分け (代表戦が必要)"; needsDaihyo = true; }
             }
             return { teamA, teamB, result, needsDaihyo };
         }
-        function runLogicTest() {
-            const summary = calculateTeamWinner([
-                { pos: "先鋒", scoreA: 2, scoreB: 0 }, { pos: "次鋒", scoreA: 0, scoreB: 1 },
-                { pos: "中堅", scoreA: 1, scoreB: 1 }, { pos: "副将", scoreA: 0, scoreB: 0 }, { pos: "大将", scoreA: 1, scoreB: 0 }
-            ]);
-            alert(`結果: ${summary.result}\nTeamA: ${summary.teamA.wins}勝(${summary.teamA.points}本)\nTeamB: ${summary.teamB.wins}勝(${summary.teamB.points}本)`);
+
+        // --- 勝者をアニメーションさせるロジック ---
+        function markWinner(matchId, playerNum) {
+            const selectedText = document.getElementById(matchId + '_p' + playerNum + '_text').textContent;
+            const line = document.getElementById(matchId + '_win_line');
+            const box1 = document.getElementById(matchId + '_p1_box');
+            const box2 = document.getElementById(matchId + '_p2_box');
+
+            [box1, box2].forEach(box => { box.setAttribute('fill', 'white'); box.setAttribute('stroke', '#d1d5db'); });
+
+            const selectedBox = document.getElementById(matchId + '_p' + playerNum + '_box');
+            selectedBox.setAttribute('fill', '#fef2f2');
+            selectedBox.setAttribute('stroke', '#ef4444');
+
+            line.style.stroke = "#ef4444";
+            line.style.strokeDashoffset = "0";
+
+            if (matchId === 'm1') {
+                const m3p1 = document.getElementById('m3_p1_text');
+                m3p1.textContent = selectedText;
+                m3p1.setAttribute('fill', '#111827'); 
+                m3p1.setAttribute('font-size', '12'); m3p1.setAttribute('font-weight', 'bold');
+            } else if (matchId === 'm2') {
+                const m3p2 = document.getElementById('m3_p2_text');
+                m3p2.textContent = selectedText;
+                m3p2.setAttribute('fill', '#111827');
+                m3p2.setAttribute('font-size', '12'); m3p2.setAttribute('font-weight', 'bold');
+            } else if (matchId === 'm3') {
+                const champText = document.getElementById('champion_text');
+                const champBox = document.getElementById('champion_box');
+                champText.textContent = selectedText;
+                champBox.setAttribute('stroke-dasharray', '0'); 
+                champBox.setAttribute('fill', '#fee2e2'); 
+                if (window.navigator.vibrate) window.navigator.vibrate([30, 50, 30, 50, 100]);
+            }
+            if (matchId !== 'm3' && window.navigator.vibrate) window.navigator.vibrate(15);
         }
+
+        function testSaveTournament() {}
+        function testUpdateMatch() {}
+        function runLogicTest() {}
     </script>
 </body>
 </html>
